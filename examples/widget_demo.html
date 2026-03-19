@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<!--
+    ElevenLabs Agent Widget Example
+    
+    This HTML page demonstrates how to embed an ElevenLabs Conversational AI
+    agent using their JavaScript widget. The widget handles all audio,
+    WebSocket connections, and UI automatically.
+    
+    Setup:
+    1. Replace AGENT_ID_HERE with your actual agent ID
+    2. Open in a browser (file:// or served via HTTP)
+    3. Click the widget button to start a conversation
+    
+    Widget Options:
+    - data-agent-position: "left" | "right" | "center"
+    - data-primary-color: Hex color for the widget button
+    - data-height/width: Widget dimensions when expanded
+    
+    Author: Chad Hendren
+    Created: March 2026
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElevenLabs Agent Widget Demo</title>
+    
+    <!-- Basic styling for the demo page -->
+    <style>
+        /* 
+         * These styles are just for the demo page itself.
+         * The ElevenLabs widget handles its own styling.
+         */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* Demo card container */
+        .demo-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+        
+        /* Header styling */
+        .demo-card h1 {
+            color: #1a1a2e;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .demo-card .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        
+        /* Feature list */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .feature {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .feature h3 {
+            color: #667eea;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        
+        .feature p {
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* Instructions section */
+        .instructions {
+            background: #f0f4ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #444;
+            line-height: 1.8;
+        }
+        
+        .instructions code {
+            background: #e0e7ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+        
+        /* Widget pointer */
+        .widget-pointer {
+            position: fixed;
+            bottom: 100px;
+            right: 100px;
+            background: #1a1a2e;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            animation: bounce 2s infinite;
+            z-index: 999;
+        }
+        
+        .widget-pointer::after {
+            content: "→";
+            margin-left: 5px;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Demo content card -->
+    <div class="demo-card">
+        <h1>🎙️ AI Voice Agent Demo</h1>
+        <p class="subtitle">Click the button in the bottom-right to start talking</p>
+        
+        <!-- Feature highlights -->
+        <div class="features">
+            <div class="feature">
+                <h3>💬 Natural Conversation</h3>
+                <p>Talk naturally with the AI agent. It understands context and responds intelligently.</p>
+            </div>
+            <div class="feature">
+                <h3>🔊 Real-Time Audio</h3>
+                <p>Low-latency voice synthesis with ElevenLabs' text-to-speech technology.</p>
+            </div>
+            <div class="feature">
+                <h3>🎯 Custom Persona</h3>
+                <p>The agent follows custom instructions and maintains a consistent personality.</p>
+            </div>
+            <div class="feature">
+                <h3>🔒 Secure</h3>
+                <p>End-to-end encrypted communication with secure WebSocket connections.</p>
+            </div>
+        </div>
+        
+        <!-- Setup instructions -->
+        <div class="instructions">
+            <h3>🛠️ Implementation Notes</h3>
+            <ol>
+                <li>This demo uses the <code>elevenlabs-convai</code> widget</li>
+                <li>Replace <code>AGENT_ID_HERE</code> with your agent ID</li>
+                <li>The widget handles audio permissions automatically</li>
+                <li>Make sure your browser allows microphone access</li>
+            </ol>
+        </div>
+    </div>
+    
+    <!-- Widget pointer animation -->
+    <div class="widget-pointer">Click to talk</div>
+    
+    <!--
+        ============================================================
+        ELEVENLABS WIDGET INTEGRATION
+        ============================================================
+        
+        This is the key integration code. The widget script loads
+        the ElevenLabs conversational AI interface.
+        
+        Required: Replace AGENT_ID_HERE with your actual agent ID
+        from the ElevenLabs dashboard.
+        
+        Optional attributes:
+        - data-agent-position: Widget position ("right" | "left" | "center")
+        - data-primary-color: Button color (hex, e.g., "#667eea")
+        - data-height: Widget height when open (e.g., "500px")
+        - data-width: Widget width when open (e.g., "350px")
+        
+        For the full API reference, see:
+        https://elevenlabs.io/docs/conversational-ai/widget
+        ============================================================
+    -->
+    <elevenlabs-convai agent-id="AGENT_ID_HERE"></elevenlabs-convai>
+    
+    <!-- Load the ElevenLabs widget script -->
+    <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+    
+    <!--
+        ============================================================
+        CUSTOM EVENT HANDLERS (Optional)
+        ============================================================
+        
+        You can listen to widget events for analytics or custom UI:
+        
+        - elevenlabs:conversation-started
+        - elevenlabs:conversation-ended
+        - elevenlabs:user-message
+        - elevenlabs:agent-message
+        
+        Example usage below:
+        ============================================================
+    -->
+    <script>
+        // Wait for the widget to load
+        document.addEventListener('DOMContentLoaded', function() {
+            const widget = document.querySelector('elevenlabs-convai');
+            
+            if (widget) {
+                // Listen for conversation start
+                widget.addEventListener('elevenlabs:conversation-started', function(e) {
+                    console.log('🎙️ Conversation started');
+                    // Hide the pointer when conversation starts
+                    document.querySelector('.widget-pointer').style.display = 'none';
+                });
+                
+                // Listen for conversation end
+                widget.addEventListener('elevenlabs:conversation-ended', function(e) {
+                    console.log('👋 Conversation ended');
+                    // Show the pointer again
+                    document.querySelector('.widget-pointer').style.display = 'block';
+                });
+                
+                // Listen for user messages (optional - for analytics)
+                widget.addEventListener('elevenlabs:user-message', function(e) {
+                    console.log('👤 User:', e.detail);
+                });
+                
+                // Listen for agent messages (optional - for analytics)
+                widget.addEventListener('elevenlabs:agent-message', function(e) {
+                    console.log('🤖 Agent:', e.detail);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

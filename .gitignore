@@ -1,0 +1,79 @@
+# ElevenLabs Connect - Git Ignore File
+
+# ========================
+# Environment & Credentials
+# ========================
+# NEVER commit these files - they contain sensitive API keys
+.env
+.env.*
+*.env
+!.env.example
+
+# ========================
+# Python
+# ========================
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# ========================
+# IDE & Editors
+# ========================
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ========================
+# Testing
+# ========================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ========================
+# macOS
+# ========================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ========================
+# Audio/Output Files
+# ========================
+# Audio files generated during testing
+*.wav
+*.mp3
+*.ogg
+audio_output/
+voice_output/
+
+# ========================
+# Logs
+# ========================
+*.log
+logs/
