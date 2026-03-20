@@ -218,9 +218,9 @@
         <div class="panel widget-section">
             <h2>🎙️ Live Widget (Agent ID Required)</h2>
             <p style="color: #666; margin-bottom: 15px;">
-                Replace <code>AGENT_ID_HERE</code> in the HTML below with your actual agent ID, then the widget will appear at the bottom-right.
+                Replace <code>agent_6201km43egt3f39tt000587m4ehp</code> in the HTML below with your actual agent ID, then the widget will appear at the bottom-right.
             </p>
-            <div class="code">&lt;elevenlabs-convai agent-id="AGENT_ID_HERE"&gt;&lt;/elevenlabs-convai&gt;</div>
+            <div class="code">&lt;elevenlabs-convai agent-id="agent_6201km43egt3f39tt000587m4ehp"&gt;&lt;/elevenlabs-convai&gt;</div>
             <p style="color: #999; font-size: 0.9rem; margin-top: 10px;">
                 ⬇️ Widget will appear in the bottom-right corner once configured
             </p>
@@ -228,7 +228,7 @@
     </div>
     
     <!-- ElevenLabs Widget -->
-    <elevenlabs-convai agent-id="AGENT_ID_HERE"></elevenlabs-convai>
+    <elevenlabs-convai agent-id="agent_6201km43egt3f39tt000587m4ehp"></elevenlabs-convai>
     <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
     
     <!-- Diagnostic Script -->
@@ -280,7 +280,7 @@
             // Check 4: Agent ID
             results.push({
                 name: 'Agent ID Configured',
-                pass: agentId !== '' && agentId !== 'AGENT_ID_HERE',
+                pass: agentId !== '' && agentId !== 'agent_6201km43egt3f39tt000587m4ehp',
                 message: agentId ? `ID: ${agentId.substring(0, 8)}...` : 'Not configured'
             });
             
