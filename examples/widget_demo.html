@@ -198,13 +198,10 @@
         ============================================================
         
         This is the key integration code. The widget script loads
-        the ElevenLabs conversational AI interface with audio support.
+        the ElevenLabs conversational AI interface.
         
-        CRITICAL: Replace AGENT_ID_HERE with your actual agent ID
+        Required: Replace AGENT_ID_HERE with your actual agent ID
         from the ElevenLabs dashboard.
-        
-        Required attributes for audio input:
-        - agent-id: Your agent ID
         
         Optional attributes:
         - data-agent-position: Widget position ("right" | "left" | "center")
@@ -212,21 +209,11 @@
         - data-height: Widget height when open (e.g., "500px")
         - data-width: Widget width when open (e.g., "350px")
         
-        ⚠️ TROUBLESHOOTING AUDIO NOT WORKING:
-        1. Browser must support WebRTC (all modern browsers do)
-        2. Browser must have HTTPS or localhost
-        3. User must grant microphone permission
-        4. Check browser DevTools → Application → Permissions → Microphone
-        
         For the full API reference, see:
         https://elevenlabs.io/docs/conversational-ai/widget
         ============================================================
     -->
-    <elevenlabs-convai 
-        agent-id="agent_6201km43egt3f39tt000587m4ehp"
-        data-agent-position="right"
-        data-primary-color="#667eea">
-    </elevenlabs-convai>
+    <elevenlabs-convai agent-id="AGENT_ID_HERE"></elevenlabs-convai>
     
     <!-- Load the ElevenLabs widget script -->
     <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
