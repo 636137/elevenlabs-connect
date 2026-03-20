@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElevenLabs Widget - Audio Connection Debugger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .checklist {
+            list-style: none;
+            margin: 15px 0;
+        }
+        
+        .checklist li {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .checklist li.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .checklist li.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .checklist li.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .checklist li::before {
+            font-weight: bold;
+            min-width: 20px;
+        }
+        
+        .checklist li.pass::before { content: "✓"; color: #28a745; }
+        .checklist li.fail::before { content: "✗"; color: #dc3545; }
+        .checklist li.pending::before { content: "?"; color: #ffc107; }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: monospace;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        
+        .button:hover {
+            background: #5568d3;
+        }
+        
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .widget-section {
+            grid-column: 1 / -1;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .code {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Diagnostic Panel -->
+        <div class="panel">
+            <h2>📋 Diagnostics</h2>
+            
+            <h3 style="font-size: 1rem; margin-top: 15px; color: #333;">Browser Capabilities</h3>
+            <ul class="checklist" id="browserChecks">
+                <li class="pending">HTTPS/localhost</li>
+                <li class="pending">WebRTC Support</li>
+                <li class="pending">Microphone Permission</li>
+                <li class="pending">getUserMedia API</li>
+            </ul>
+            
+            <div class="input-group">
+                <label for="agentId">Agent ID:</label>
+                <input type="text" id="agentId" placeholder="e.g., abc123xyz..." value="">
+            </div>
+            
+            <button class="button" onclick="runDiagnostics()">🔍 Run Diagnostics</button>
+            
+            <div id="diagnosticStatus" class="status" style="display: none;"></div>
+        </div>
+        
+        <!-- Configuration Panel -->
+        <div class="panel">
+            <h2>⚙️ Configuration</h2>
+            
+            <h3 style="font-size: 1rem; margin-top: 15px; color: #333;">Steps to Fix Audio</h3>
+            <ol style="margin-left: 20px; color: #666; line-height: 1.8;">
+                <li><strong>Replace Agent ID:</strong> Paste your ElevenLabs agent ID above</li>
+                <li><strong>Grant Permissions:</strong> Click "Test Microphone" button</li>
+                <li><strong>Enable Audio:</strong> Allow browser microphone access</li>
+                <li><strong>Open Widget:</strong> Click the widget button (bottom-right)</li>
+                <li><strong>Start Call:</strong> Click "Start conversation"</li>
+                <li><strong>Speak:</strong> Speak clearly after hearing the agent</li>
+            </ol>
+            
+            <button class="button" onclick="testMicrophone()">🎤 Test Microphone</button>
+            
+            <div id="micStatus" class="status" style="display: none;"></div>
+        </div>
+        
+        <!-- Widget Area -->
+        <div class="panel widget-section">
+            <h2>🎙️ Live Widget (Agent ID Required)</h2>
+            <p style="color: #666; margin-bottom: 15px;">
+                Replace <code>AGENT_ID_HERE</code> in the HTML below with your actual agent ID, then the widget will appear at the bottom-right.
+            </p>
+            <div class="code">&lt;elevenlabs-convai agent-id="AGENT_ID_HERE"&gt;&lt;/elevenlabs-convai&gt;</div>
+            <p style="color: #999; font-size: 0.9rem; margin-top: 10px;">
+                ⬇️ Widget will appear in the bottom-right corner once configured
+            </p>
+        </div>
+    </div>
+    
+    <!-- ElevenLabs Widget -->
+    <elevenlabs-convai agent-id="AGENT_ID_HERE"></elevenlabs-convai>
+    <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+    
+    <!-- Diagnostic Script -->
+    <script>
+        // =============================================
+        // DIAGNOSTIC FUNCTIONS
+        // =============================================
+        
+        async function runDiagnostics() {
+            const results = [];
+            const agentId = document.getElementById('agentId').value.trim();
+            
+            // Check 1: Protocol
+            const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+            results.push({
+                name: 'HTTPS/localhost',
+                pass: isSecure,
+                message: isSecure ? 'Secure connection ✓' : 'Not HTTPS or localhost ✗'
+            });
+            
+            // Check 2: WebRTC
+            const hasWebRTC = !!(
+                navigator.mediaDevices &&
+                navigator.mediaDevices.getUserMedia
+            );
+            results.push({
+                name: 'WebRTC Support',
+                pass: hasWebRTC,
+                message: hasWebRTC ? 'WebRTC available ✓' : 'WebRTC not available ✗'
+            });
+            
+            // Check 3: Microphone Permission
+            let micPermission = 'unknown';
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    const result = await navigator.permissions.query({ name: 'microphone' });
+                    micPermission = result.state;
+                }
+            } catch (e) {
+                micPermission = 'error';
+            }
+            
+            results.push({
+                name: 'Microphone Permission',
+                pass: micPermission === 'granted',
+                message: `Status: ${micPermission.toUpperCase()}`
+            });
+            
+            // Check 4: Agent ID
+            results.push({
+                name: 'Agent ID Configured',
+                pass: agentId !== '' && agentId !== 'AGENT_ID_HERE',
+                message: agentId ? `ID: ${agentId.substring(0, 8)}...` : 'Not configured'
+            });
+            
+            // Update UI
+            updateChecklist(results);
+            
+            // Show summary
+            const passed = results.filter(r => r.pass).length;
+            const total = results.length;
+            const statusDiv = document.getElementById('diagnosticStatus');
+            
+            if (passed === total) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = `✓ All checks passed! Ready to use the widget.`;
+            } else if (passed > 0) {
+                statusDiv.className = 'status';
+                statusDiv.innerHTML = `⚠️ ${passed}/${total} checks passed. See details above.`;
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `✗ ${total - passed} issues found. Fix them before using.`;
+            }
+            statusDiv.style.display = 'block';
+        }
+        
+        function updateChecklist(results) {
+            const listEl = document.getElementById('browserChecks');
+            listEl.innerHTML = '';
+            
+            results.forEach(result => {
+                const li = document.createElement('li');
+                li.className = result.pass ? 'pass' : 'fail';
+                li.textContent = `${result.name}: ${result.message}`;
+                listEl.appendChild(li);
+            });
+        }
+        
+        async function testMicrophone() {
+            const statusDiv = document.getElementById('micStatus');
+            statusDiv.style.display = 'block';
+            
+            try {
+                statusDiv.innerHTML = '⏳ Requesting microphone access...';
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Stop using the stream
+                stream.getTracks().forEach(track => track.stop());
+                
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✓ Microphone access granted! You\'re ready to use the widget.';
+            } catch (error) {
+                statusDiv.className = 'status error';
+                
+                if (error.name === 'NotAllowedError') {
+                    statusDiv.innerHTML = '✗ Microphone access denied. Allow access in browser permissions.';
+                } else if (error.name === 'NotFoundError') {
+                    statusDiv.innerHTML = '✗ No microphone found. Check your audio hardware.';
+                } else {
+                    statusDiv.innerHTML = `✗ Error: ${error.message}`;
+                }
+            }
+        }
+        
+        // Listen for widget events
+        document.addEventListener('DOMContentLoaded', () => {
+            const widget = document.querySelector('elevenlabs-convai');
+            
+            if (widget) {
+                widget.addEventListener('elevenlabs:conversation-started', () => {
+                    console.log('✓ Conversation started - audio should now flow');
+                });
+                
+                widget.addEventListener('elevenlabs:conversation-ended', () => {
+                    console.log('✓ Conversation ended');
+                });
+                
+                widget.addEventListener('elevenlabs:user-message', (e) => {
+                    console.log('👤 User message received:', e.detail);
+                });
+                
+                widget.addEventListener('elevenlabs:agent-message', (e) => {
+                    console.log('🤖 Agent message received:', e.detail);
+                });
+            }
+        });
+        
+        // Auto-run diagnostics on load
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostics, 1000);
+        });
+    </script>
+</body>
+</html>
